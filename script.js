@@ -7,7 +7,6 @@ document.querySelectorAll('nav a').forEach(link => {
   });
 });
 
-// Traduções PT e EN
 const translations = {
   "pt": {
     "name": "Diego Vilella Rodrigues",
@@ -25,6 +24,12 @@ const translations = {
     "experience-title": "Experiência Profissional",
     "job-1-title": "Freelancer - Desenvolvedor Web",
     "job-1-desc": "Manutenção e correção de bugs, otimização de desempenho e implementação de funcionalidades em sites.",
+    "job-2-title": "Trucks Control - Analista Desenvolvedor WEB",
+    "job-2-desc": "Criação de leitura de biometria via web e desenvolvimento de funcionalidades para aplicações de RH.",
+    "job-3-title": "TCS - Analista Desenvolvedor",
+    "job-3-desc": "Incidentes e Alertas do Banco Itaú e Seguradora Porto Seguro. Manutenção corretiva e metodologia ágil (Scrum).",
+    "job-4-title": "InfoSolutions - Programador Júnior",
+    "job-4-desc": "Gestão, implementação e documentação de sistemas. Desenvolvimento desktop e web na plataforma Windev.",
     "projects-title": "Projetos",
     "project-1-title": "Projeto X",
     "project-1-desc": "Descrição breve do projeto. Tecnologias utilizadas: HTML, CSS, JavaScript, .NET.",
@@ -47,34 +52,20 @@ const translations = {
     "experience-title": "Professional Experience",
     "job-1-title": "Freelancer - Web Developer",
     "job-1-desc": "Maintenance and bug fixes, performance optimization, and feature implementation in websites.",
-    "projects-title": "Projects",
-    "project-1-title": "Project X",
-    "project-1-desc": "Brief project description. Technologies used: HTML, CSS, JavaScript, .NET.",
-    "view-project": "View Project",
     "contact-title": "Contact"
   }
 };
 
-// Detecta idioma do navegador
-const userLang = navigator.language.startsWith("pt") ? "pt" : "en";
-let currentLang = userLang;
-
-// Função para atualizar o idioma
-function updateLanguage(lang) {
-  document.querySelectorAll("[data-lang]").forEach(element => {
-    const key = element.getAttribute("data-lang");
-    element.textContent = translations[lang][key];
-  });
-
-  // Atualiza o texto do botão
-  document.getElementById("toggle-lang").textContent = lang === "pt" ? "🇺🇸 English" : "🇧🇷 Português";
-}
-
-// Evento de clique para trocar o idioma
-document.getElementById("toggle-lang").addEventListener("click", () => {
-  currentLang = currentLang === "pt" ? "en" : "pt";
-  updateLanguage(currentLang);
+document.querySelector("#toggle-lang").addEventListener("click", () => {
+  const lang = document.documentElement.lang === "pt" ? "en" : "pt";
+  document.documentElement.lang = lang;
+  updateLanguage(lang);
 });
 
-// Define o idioma inicial
-updateLanguage(currentLang);
+function updateLanguage(lang) {
+  document.querySelectorAll("[data-lang]").forEach(el => {
+    el.textContent = translations[lang][el.dataset.lang];
+  });
+}
+
+updateLanguage("pt");
