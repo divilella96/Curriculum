@@ -52,20 +52,42 @@ const translations = {
     "experience-title": "Professional Experience",
     "job-1-title": "Freelancer - Web Developer",
     "job-1-desc": "Maintenance and bug fixes, performance optimization, and feature implementation in websites.",
+    "job-2-title": "Trucks Control - Web Developer",
+    "job-2-desc": "Development of biometric reading via web and implementation of HR functionalities.",
+    "job-3-title": "TCS - Software Developer",
+    "job-3-desc": "Incident and alert handling for Banco Itaú and Porto Seguro Insurance. Corrective maintenance and Agile methodology (Scrum).",
+    "job-4-title": "InfoSolutions - Junior Programmer",
+    "job-4-desc": "System management, implementation, and documentation. Desktop and web development using Windev.",
+    "projects-title": "Projects",
+    "project-1-title": "Project X",
+    "project-1-desc": "Brief project description. Technologies used: HTML, CSS, JavaScript, .NET.",
+    "view-project": "View Project",
     "contact-title": "Contact"
   }
 };
 
-document.querySelector("#toggle-lang").addEventListener("click", () => {
-  const lang = document.documentElement.lang === "pt" ? "en" : "pt";
-  document.documentElement.lang = lang;
-  updateLanguage(lang);
-});
+// Detecta o idioma do navegador
+const userLang = navigator.language.startsWith("pt") ? "pt" : "en";
+let currentLang = userLang;
 
+// Atualiza o idioma na página
 function updateLanguage(lang) {
-  document.querySelectorAll("[data-lang]").forEach(el => {
-    el.textContent = translations[lang][el.dataset.lang];
+  document.querySelectorAll("[data-lang]").forEach(element => {
+    const key = element.getAttribute("data-lang");
+    if (translations[lang][key]) {
+      element.textContent = translations[lang][key];
+    }
   });
+
+  // Atualiza o texto do botão
+  document.getElementById("toggle-lang").textContent = lang === "pt" ? "🇺🇸 English" : "🇧🇷 Português";
 }
 
-updateLanguage("pt");
+// Evento de clique para trocar o idioma
+document.getElementById("toggle-lang").addEventListener("click", () => {
+  currentLang = currentLang === "pt" ? "en" : "pt";
+  updateLanguage(currentLang);
+});
+
+// Define o idioma inicial
+updateLanguage(currentLang);
