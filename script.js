@@ -7,87 +7,104 @@ document.querySelectorAll('nav a').forEach(link => {
   });
 });
 
-const translations = {
-  "pt": {
-    "name": "Diego Vilella Rodrigues",
-    "title": "Analista de Sistemas | Desenvolvedor Web",
-    "menu-about": "Sobre",
-    "menu-education": "Formação",
-    "menu-experience": "Experiência",
-    "menu-projects": "Projetos",
-    "menu-contact": "Contato",
-    "about-title": "Sobre Mim",
-    "about-text": "Brasileiro, 27 anos. Apaixonado por tecnologia e desenvolvimento. Experiência em projetos web com HTML, CSS, JavaScript, .NET e outras tecnologias.",
-    "education-title": "Formação",
-    "education-university": "Universidade Tecnológica Federal do Paraná - UTFPR",
-    "education-course": "Análise e Desenvolvimento de Sistemas (Concluído em 12/2018)",
-    "experience-title": "Experiência Profissional",
-    "job-1-title": "Freelancer - Desenvolvedor Web",
-    "job-1-desc": "Manutenção e correção de bugs, otimização de desempenho e implementação de funcionalidades em sites.",
-    "job-2-title": "Trucks Control - Analista Desenvolvedor WEB",
-    "job-2-desc": "Criação de leitura de biometria via web e desenvolvimento de funcionalidades para aplicações de RH.",
-    "job-3-title": "TCS - Analista Desenvolvedor",
-    "job-3-desc": "Incidentes e Alertas do Banco Itaú e Seguradora Porto Seguro. Manutenção corretiva e metodologia ágil (Scrum).",
-    "job-4-title": "InfoSolutions - Programador Júnior",
-    "job-4-desc": "Gestão, implementação e documentação de sistemas. Desenvolvimento desktop e web na plataforma Windev.",
-    "projects-title": "Projetos",
-    "project-1-title": "Projeto X",
-    "project-1-desc": "Descrição breve do projeto. Tecnologias utilizadas: HTML, CSS, JavaScript, .NET.",
-    "view-project": "Ver Projeto",
-    "contact-title": "Contato"
-  },
-  "en": {
-    "name": "Diego Vilella Rodrigues",
-    "title": "Systems Analyst | Web Developer",
-    "menu-about": "About",
-    "menu-education": "Education",
-    "menu-experience": "Experience",
-    "menu-projects": "Projects",
-    "menu-contact": "Contact",
-    "about-title": "About Me",
-    "about-text": "Brazilian, 27 years old. Passionate about technology and development. Experience in web projects with HTML, CSS, JavaScript, .NET, and other technologies.",
-    "education-title": "Education",
-    "education-university": "Federal University of Technology - Paraná (UTFPR)",
-    "education-course": "System Analysis and Development (Completed in 12/2018)",
-    "experience-title": "Professional Experience",
-    "job-1-title": "Freelancer - Web Developer",
-    "job-1-desc": "Maintenance and bug fixes, performance optimization, and feature implementation in websites.",
-    "job-2-title": "Trucks Control - Web Developer",
-    "job-2-desc": "Development of biometric reading via web and implementation of HR functionalities.",
-    "job-3-title": "TCS - Software Developer",
-    "job-3-desc": "Incident and alert handling for Banco Itaú and Porto Seguro Insurance. Corrective maintenance and Agile methodology (Scrum).",
-    "job-4-title": "InfoSolutions - Junior Programmer",
-    "job-4-desc": "System management, implementation, and documentation. Desktop and web development using Windev.",
-    "projects-title": "Projects",
-    "project-1-title": "Project X",
-    "project-1-desc": "Brief project description. Technologies used: HTML, CSS, JavaScript, .NET.",
-    "view-project": "View Project",
-    "contact-title": "Contact"
-  }
-};
+let translations = {};
 
-// Detecta o idioma do navegador
-const userLang = navigator.language.startsWith("pt") ? "pt" : "en";
-let currentLang = userLang;
+// Função para buscar o arquivo de traduções
+async function loadTranslations() {
+  try {
+    const response = await fetch('translations.json');
+    translations = await response.json();
+    initializeLanguage();
+    // Fetch GitHub projects after translations are loaded
+    fetchAndDisplayProjects('divilella96');
+  } catch (error) {
+    console.error('Erro ao carregar traduções:', error);
+  }
+}
+
+// Detecta o idioma do navegador e inicializa
+function initializeLanguage() {
+  const userLang = navigator.language.startsWith("pt") ? "pt" : "en";
+  updateLanguage(userLang);
+}
 
 // Atualiza o idioma na página
 function updateLanguage(lang) {
+  document.documentElement.lang = lang; // Set the lang attribute on the HTML element
+  document.getElementById("toggle-lang").dataset.currentLang = lang; // Store current language
+
   document.querySelectorAll("[data-lang]").forEach(element => {
     const key = element.getAttribute("data-lang");
-    if (translations[lang][key]) {
+    if (translations[lang] && translations[lang][key]) {
       element.textContent = translations[lang][key];
     }
   });
 
-  // Atualiza o texto do botão
   document.getElementById("toggle-lang").textContent = lang === "pt" ? "🇺🇸 English" : "🇧🇷 Português";
 }
 
 // Evento de clique para trocar o idioma
 document.getElementById("toggle-lang").addEventListener("click", () => {
-  currentLang = currentLang === "pt" ? "en" : "pt";
-  updateLanguage(currentLang);
+  const currentLang = document.getElementById("toggle-lang").dataset.currentLang;
+  const newLang = currentLang === "pt" ? "en" : "pt";
+  updateLanguage(newLang);
 });
 
-// Define o idioma inicial
-updateLanguage(currentLang);
+// Função para buscar projetos do GitHub e exibi-los
+async function fetchAndDisplayProjects(username) {
+  const projectsSection = document.getElementById('projetos');
+
+  const staticCard = projectsSection.querySelector('.card');
+  if (staticCard) {
+    staticCard.remove();
+  }
+
+  const projectsGrid = document.createElement('div');
+  projectsGrid.className = 'projects-grid';
+  projectsSection.appendChild(projectsGrid);
+
+  projectsGrid.innerHTML = '<p>Carregando projetos do GitHub...</p>';
+
+  try {
+    const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&direction=desc`);
+    if (!response.ok) {
+        throw new Error(`GitHub API error! status: ${response.status}`);
+    }
+    const repos = await response.json();
+
+    const filteredRepos = repos.filter(repo => !repo.fork && repo.description).slice(0, 6);
+
+    if (filteredRepos.length === 0) {
+        projectsGrid.innerHTML = '<p>Nenhum projeto com descrição encontrado para exibir.</p>';
+        return;
+    }
+
+    let projectCardsHTML = '';
+    for (const repo of filteredRepos) {
+      // Not fetching languages for now to simplify and speed up loading
+      // const langResponse = await fetch(repo.languages_url);
+      // const languages = await langResponse.json();
+      // const mainLanguages = Object.keys(languages).slice(0, 3);
+
+      projectCardsHTML += `
+        <div class="card">
+          <h3>${repo.name}</h3>
+          <p>${repo.description}</p>
+          ${repo.language ? `<div class="languages"><span>${repo.language}</span></div>` : ''}
+          <a href="${repo.html_url}" class="btn" target="_blank" rel="noopener noreferrer" data-lang="view-project">Ver Projeto</a>
+        </div>
+      `;
+    }
+    projectsGrid.innerHTML = projectCardsHTML;
+
+    const currentLang = document.getElementById("toggle-lang").dataset.currentLang || 'pt';
+    updateLanguage(currentLang);
+
+  } catch (error) {
+    console.error('Error fetching GitHub projects:', error);
+    projectsGrid.innerHTML = '<p>Não foi possível carregar os projetos do GitHub.</p>';
+  }
+}
+
+// Carrega as traduções e define o idioma inicial
+loadTranslations();
